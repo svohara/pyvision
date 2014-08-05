@@ -4,7 +4,7 @@ Created on Jan 28, 2012
 @author: bolme
 '''
 #import freenect
-import cv
+import cv2.cv as cv
 import numpy as np
 import pyvision as pv
 

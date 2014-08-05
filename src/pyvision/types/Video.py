@@ -34,7 +34,7 @@
 import time
 import os
 import pyvision as pv
-import cv
+import cv2.cv as cv
 import random
 #from scipy import weave
 

@@ -12,7 +12,7 @@ import pyvision as pv
 import numpy as np
 #from optic_flow import *
 #from distance import *
-#import cv
+#import cv2.cv as cv
 
 import os.path
 

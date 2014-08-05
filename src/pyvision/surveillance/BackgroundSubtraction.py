@@ -37,7 +37,8 @@ Created on Oct 22, 2010
 import scipy as sp
 import pyvision as pv
 import math
-import cv
+import cv2.cv as cv
+
 #Constants used to identify a background subtraction method,
 # useful, for example, for specifying which method to use in the
 # MotionDetector class.

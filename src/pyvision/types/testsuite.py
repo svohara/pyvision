@@ -10,7 +10,7 @@ import unittest
 import pyvision as pv
 import numpy as np
 import os.path
-import cv
+import cv2.cv as cv
 
 DATA_DIR = os.path.join(pv.__path__[0],'data','test')
 SYNC_VIDEO = 'video_sync.mov'

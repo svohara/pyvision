@@ -505,20 +505,7 @@ class _VersionTest(unittest.TestCase):
         sys.stderr.flush()
         self.assert_(major > rmajor 
                      or major == rmajor and minor >= rminor 
-                     or major == rmajor and minor == rminor and sub >= sub)
-        
-    def test_libsvm_version(self):
-        import svm
-        #major,minor,sub = svm.__version__.split('.')[:3]
-        rmajor,rminor,_ = 2,86,0 # 2008/03/20
-        #major,minor,sub = int(major),int(minor),int(sub)
-        #print "%d.%d.%d >= %d.%d.%d "%(major,minor,sub,rmajor,rminor,rsub),
-        print >> sys.stderr, "No way to get version numbers >= %d.%d "%(rmajor,rminor),
-        sys.stderr.flush()
-        #self.assert_(major > rmajor 
-        #             or major == rmajor and minor >= rminor 
-        #             or major == rmajor and minor == rminor and sub >= sub)
-        self.assert_(True)        
+                     or major == rmajor and minor == rminor and sub >= sub)       
         
 def test():
     disableCommercialUseWarnings()

@@ -35,7 +35,7 @@ Created on Mar 14, 2011
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import pyvision as pv
-import cv
+import cv2.cv as cv
 import PIL.Image
 import weakref
 

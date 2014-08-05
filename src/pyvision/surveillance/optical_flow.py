@@ -37,7 +37,7 @@ Created on Dec 10, 2009
 @author: bolme
 '''
 import pyvision as pv
-import cv
+import cv2.cv as cv
 import numpy as np
 
 

@@ -9,7 +9,7 @@ Created on Jul 9, 2011
 @author: bolme
 '''
 import pyvision as pv
-import cv
+import cv2.cv as cv
 from pyvision.face.CascadeDetector import CascadeDetector
 from pyvision.face.FilterEyeLocator import FilterEyeLocator
 

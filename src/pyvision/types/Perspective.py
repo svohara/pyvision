@@ -41,7 +41,7 @@ import unittest
 import os.path
 #import math
 
-import cv    
+import cv2.cv as cv    
 import numpy as np
 import numpy.linalg as la
 import pyvision as pv

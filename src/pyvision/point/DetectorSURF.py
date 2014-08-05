@@ -6,7 +6,7 @@ Created on Apr 16, 2009
 from pyvision.point.DetectorROI import DetectorROI
 #import pyvision as pv
 #from scipy import weave
-import cv
+import cv2.cv as cv
 
 def ExtractSURF(im,min_hessian=300):
     '''

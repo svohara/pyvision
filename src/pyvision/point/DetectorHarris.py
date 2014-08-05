@@ -37,7 +37,7 @@ import os.path
 
 import numpy as np
 
-import cv
+import cv2.cv as cv
 import scipy.ndimage as ndi
 import pyvision as pv
 from pyvision.point.DetectorROI import DetectorROI

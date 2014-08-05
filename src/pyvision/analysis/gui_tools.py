@@ -38,7 +38,7 @@ Created on Oct 31, 2011
 '''
 
 import pyvision as pv
-import cv
+import cv2.cv as cv
 import PIL.Image as pil
 
 def null_callback(*args,**kwargs):

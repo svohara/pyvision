@@ -37,7 +37,7 @@ import pyvision as pv
 from pyvision.edge.sobel import sobel
 #from pyvision.edge.canny import canny
 from pyvision.point.DetectorSURF import DetectorSURF
-import cv
+import cv2.cv as cv
 
 if __name__ == '__main__':
     ilog = pv.ImageLog()

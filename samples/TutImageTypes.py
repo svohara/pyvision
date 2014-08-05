@@ -40,7 +40,7 @@ Created on Sep 6, 2010
 import pyvision as pv
 import numpy as np
 import scipy as sp
-import cv
+import cv2.cv as cv
 import PIL.Image
 
 import os.path
