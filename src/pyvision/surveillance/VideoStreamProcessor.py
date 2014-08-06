@@ -35,7 +35,7 @@ Created on Mar 18, 2011
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import pyvision as pv
-import cv2
+import cv2.cv as cv
 
 '''
 This module implements various Video Stream Processors, or VSPs for short.
@@ -160,13 +160,13 @@ class VideoWriterVSP(AbstractVSP):
         @param bw: Specify true if you wish for a black-and-white only output.
         @param no_annotations: set to True to output the original, non-annotated version of the image
         '''
-        cvFourCC = cv2.cv.CV_FOURCC(*fourCC_str)
+        cvFourCC = cv.CV_FOURCC(*fourCC_str)
         if bw:
-            colorFlag = cv2.CV_LOAD_IMAGE_GRAYSCALE
+            colorFlag = cv.CV_LOAD_IMAGE_GRAYSCALE
         else:
-            colorFlag = cv2.CV_LOAD_IMAGE_UNCHANGED
+            colorFlag = cv.CV_LOAD_IMAGE_UNCHANGED
         self._bw = bw
-        self._out = cv2.cv.CreateVideoWriter(filename, cvFourCC, fps, size, colorFlag)
+        self._out = cv.CreateVideoWriter(filename, cvFourCC, fps, size, colorFlag)
         self._no_annotations = no_annotations
         AbstractVSP.__init__(self, window=window, nextModule=nextModule)
         
@@ -180,9 +180,9 @@ class VideoWriterVSP(AbstractVSP):
             img2 = pv.Image(img.asAnnotated())
             
         if self._bw:
-            cv2.cv.WriteFrame(self._out, img2.asOpenCVBW())    
+            cv.WriteFrame(self._out, img2.asOpenCVBW())    
         else:
-            cv2.cv.WriteFrame(self._out, img2.asOpenCV())        
+            cv.WriteFrame(self._out, img2.asOpenCV())        
            
     def _onNewFrame(self, img, fn, **kwargs):
         self.addFrame(img)
@@ -279,7 +279,7 @@ class PeopleDetectionVSP(AbstractVSP):
         cvim = img.asOpenCV()  #convert to OpenCV format before using OpenCV functions
         rect_list = []
         try:
-            found = list(cv2.cv.HOGDetectMultiScale(cvim, cv2.cv.CreateMemStorage(0)))
+            found = list(cv.HOGDetectMultiScale(cvim, cv.CreateMemStorage(0)))
             rect_list = [ pv.Rect(x,y,w,h) for ((x,y),(w,h)) in found]  #python list comprehension            
         except:
             #cv.HOGDetectMultiScale can throw exceptions, so return empty list

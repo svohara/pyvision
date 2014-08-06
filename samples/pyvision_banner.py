@@ -38,6 +38,7 @@ from pyvision.edge.sobel import sobel
 #from pyvision.edge.canny import canny
 from pyvision.point.DetectorSURF import DetectorSURF
 import cv2.cv as cv
+import shutil
 
 if __name__ == '__main__':
     ilog = pv.ImageLog()
@@ -83,12 +84,18 @@ if __name__ == '__main__':
     
     #Demonstrate use of ImageMontage class to show a few small images in a single window
     print "Have the image montage focused in UI and hit spacebar to continue..."
-    imontage = pv.ImageMontage([im,edges,logo,logo_surf], layout=(2,2), tileSize=im.size, gutter=3, byrow=True, labels=None)
+    imontage = pv.ImageMontage([im,edges,logo,logo_surf], layout=(2,2), tile_size=im.size,
+                                gutter=3, by_row=True, labels=None)
     imontage.show(window="Image Montage", delay=0)
     
     #Show the images stored to the image log object
-    print "Showing image log. These images are stored in a tmp directory."
+    print "Showing image log."
+    print "These images are stored in a tmp directory: %s"%ilog.dir 
     ilog.show()
+    
+    print "Erasing tmp files"
+    shutil.rmtree(ilog.dir)
+    
 
     
     

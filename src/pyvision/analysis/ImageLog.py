@@ -168,9 +168,9 @@ class ImageLog:
         elif sys.platform.startswith("linux"):
             files.sort()
             startfile = join(self.dir, files.pop(0))
-            #gthumb will show thumbnails for all files in same directory as startfile.
+            #eye of gnome will show thumbnails for all files in same directory as startfile.
             #If you use KDE, gwenview might be better...
-            system("gthumb %s"%startfile)
+            system("eog %s"%startfile)
         elif sys.platform.startswith("windows"):
             print "ImageLog.show() is not supported on windows."
         
