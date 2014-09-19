@@ -49,7 +49,8 @@ class CaptureClicks:
     This object handles the data mangagement and display of the capture clicks window.
     '''
     
-    def __init__(self,im,default_points=[],keep_window_open = False,window="PyVision Capture Points"):
+    def __init__(self,im,default_points=[],keep_window_open = False,
+                 window="PyVision Capture Points", pos=None):
         '''
         Initialize the data.
         '''
@@ -57,6 +58,7 @@ class CaptureClicks:
         self.im = im.copy()
         self.keep_window_open = keep_window_open
         self._userquit = False
+        self.pos = pos #position of window
         self.reset()
         for pt in default_points:
             self.mouseCallback(cv.CV_EVENT_LBUTTONDOWN,pt.X(),pt.Y(),None,None)
@@ -67,6 +69,8 @@ class CaptureClicks:
         '''
         # Setup the mouse callback to handle mause events (optional)
         cv.NamedWindow(self.window)
+        if self.pos:
+            cv.MoveWindow(self.window, *self.pos)
         cv.SetMouseCallback(self.window, self.mouseCallback)
         
         while True:
@@ -113,7 +117,8 @@ class CaptureClicksVideo:
     This object handles the data mangagement and display of the capture clicks window.
     '''
     
-    def __init__(self, video, buffer_size = 60, callback = None, keep_window_open=False):
+    def __init__(self, video, buffer_size = 60, callback = None, 
+                 keep_window_open=False, pos=None):
         '''
         Initialize the data.
         '''
@@ -125,6 +130,7 @@ class CaptureClicksVideo:
         self.buffer_index = -1
         self.buffer_size = buffer_size
         self.keep_window_open = keep_window_open
+        self.pos = pos
         self.next()
         
         
@@ -134,7 +140,8 @@ class CaptureClicksVideo:
         '''
         # Setup the mouse callback to handle mause events (optional)
         cv.NamedWindow("PyVision Capture Points")
-        
+        if self.pos:
+            cv.MoveWindow("PyVision Capture Points", *self.pos)
         # This next line creates a memory leak where 'self' is never released
         # and the window cannot be closed.
         cv.SetMouseCallback("PyVision Capture Points", self.mouseCallback)
