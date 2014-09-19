@@ -56,6 +56,7 @@ class CaptureClicks:
         self.window = window
         self.im = im.copy()
         self.keep_window_open = keep_window_open
+        self._userquit = False
         self.reset()
         for pt in default_points:
             self.mouseCallback(cv.CV_EVENT_LBUTTONDOWN,pt.X(),pt.Y(),None,None)
@@ -73,6 +74,10 @@ class CaptureClicks:
             
             # Handle key press events.
             if key_press == ord(' '):
+                break
+            
+            if key_press == ord('q'):
+                self._userquit = True
                 break
             
             if key_press == ord('r'):
