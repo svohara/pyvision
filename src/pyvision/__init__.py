@@ -213,7 +213,7 @@ from pyvision.surveillance.VideoStreamProcessor import *
 
 from analysis.progress_bar import ProgressBar
 
-from analysis.gui_tools import capturePointsFromMouse, CaptureClicks, CaptureClicksVideo
+from analysis.gui_tools import capturePointsFromMouse, CaptureClicks, CaptureClicksVideo, CapturePolygons
 
 from pyvision.face import REDUCED_LEYE, REDUCED_REYE, REDUCED_SIZE
 

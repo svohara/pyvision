@@ -16,7 +16,7 @@ For example the current implementation has an image class which will easily
 translate image data between PIL, numpy array, and opencv formats.
 
 Dependencies
-	PIL
+	pillow (update of PIL, the Python Image Library)
 	scipy
 	numpy
 	OpenCV

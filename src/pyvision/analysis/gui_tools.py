@@ -1,6 +1,6 @@
 # PyVision License
 #
-# Copyright (c) 2006-2011 David S. Bolme
+# Copyright (c) 2006-2011 David S. Bolme and Stephen O'Hara
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,10 @@
 '''
 Created on Oct 31, 2011
 
-@author: bolme
+@author: bolme and sohara
+Original version by David Bolme.
+Modified 2014 by Stephen O'Hara to support additional capabilities,
+and an addition of an interface to capture polygons.
 '''
 
 import pyvision as pv
@@ -46,7 +49,7 @@ def null_callback(*args,**kwargs):
 
 class CaptureClicks:
     '''
-    This object handles the data mangagement and display of the capture clicks window.
+    This object handles the data management and display of the capture clicks window.
     '''
     
     def __init__(self,im,default_points=[],keep_window_open = False,
@@ -55,34 +58,66 @@ class CaptureClicks:
         Initialize the data.
         '''
         self.window = window
-        self.im = im.copy()
+        self.im = im
         self.keep_window_open = keep_window_open
         self._userquit = False
         self.pos = pos #position of window
-        self.reset()
-        for pt in default_points:
-            self.mouseCallback(cv.CV_EVENT_LBUTTONDOWN,pt.X(),pt.Y(),None,None)
-            
+        self.current_points = []
+        self.default_points = default_points
+        self._showHelp = True
+        
+    def _clearLastPoint(self):
+        if self.current_points:
+            _ = self.current_points.pop()  #remove most recent element from list and discard
+        return
+    
+    def _drawInstructions(self, canvas):
+        canvas.annotateRect(pv.Rect(2,2,300,70), fill_color="white", alpha=0.25)
+        canvas.annotateLabel(pv.Point(10,10), "Click anywhere in the image to select a point.",color='yellow')
+        canvas.annotateLabel(pv.Point(10,20), "Press 'r' to reset.", color='yellow')
+        canvas.annotateLabel(pv.Point(10,30), "Press 'x' to delete the recent point.",color='yellow')
+        canvas.annotateLabel(pv.Point(10,40), "Press the space bar when finished.",color='yellow')
+        canvas.annotateLabel(pv.Point(10,50), "Press 'h' to toggle display of this help text.", color='yellow')
+    
+    def _updateImage(self):
+        '''
+        Renders the annotations on top of the current image
+        '''
+        canvas = self.im.copy() #won't copy annotations
+        if self._showHelp: self._drawInstructions(canvas)
+        for idx,pt in enumerate(self.default_points):
+            canvas.annotateLabel(pt,str(idx+1),mark='below', color='yellow')
+        for idx,pt in enumerate(self.current_points):
+            canvas.annotateLabel(pt, str(idx+1+len(self.default_points)), mark='below', color='red')
+        self.canvas = canvas
+       
     def display(self):
         '''
         Display the window and run the main event loop.
         '''
-        # Setup the mouse callback to handle mause events (optional)
+        # Setup the mouse callback to handle mouse events (optional)
         cv.NamedWindow(self.window)
         if self.pos:
             cv.MoveWindow(self.window, *self.pos)
         cv.SetMouseCallback(self.window, self.mouseCallback)
         
         while True:
-            key_press = self.im.show(self.window,delay=100)
+            self._updateImage()
+            key_press = self.canvas.show(self.window,delay=100)
             
             # Handle key press events.
             if key_press == ord(' '):
                 break
             
+            if key_press == ord('h'):
+                self._showHelp = not self._showHelp
+            
             if key_press == ord('q'):
                 self._userquit = True
                 break
+            
+            if key_press == ord('x'):
+                self._clearLastPoint()
             
             if key_press == ord('r'):
                 self.reset()
@@ -90,18 +125,15 @@ class CaptureClicks:
         if not self.keep_window_open:
             cv.DestroyWindow(self.window)
             
-        return self.points
+        #self._showHelp = True
+        all_points = self.default_points + self.current_points
+        return all_points
                 
     def reset(self):
         '''
         Clear the points and start over.
         '''
-        self.im = self.im.copy()
-        self.im.annotateLabel(pv.Point(10,10), "Click anywhere in the image to select a point.",color='yellow')
-        self.im.annotateLabel(pv.Point(10,20), "Press the 'r' to reset.",color='yellow')
-        self.im.annotateLabel(pv.Point(10,30), "Press the space bar when finished.",color='yellow')
-        self.points = []
-        
+        self.current_points = []
             
     def mouseCallback(self, event, x, y, flags, param):
         '''
@@ -109,12 +141,120 @@ class CaptureClicks:
         '''
         if event in [cv.CV_EVENT_LBUTTONDOWN]:
             point = pv.Point(x,y)
-            self.im.annotateLabel(point,str(len(self.points)),mark='below')
-            self.points.append(point)
+            self.current_points.append(point)
         
+class CapturePolygons(CaptureClicks):
+    '''
+    This object handles the data management and display of the capture polygons window.
+    '''
+    
+    def __init__(self,im,default_polygons=[],keep_window_open = False,
+                 window="PyVision Capture Polygons", pos=None):
+        '''
+        Initialize the data.
+        '''
+        CaptureClicks.__init__(self, im, default_points=[], keep_window_open=keep_window_open,
+                                window=window, pos=pos)
+        
+        self.default_polygons = default_polygons #polygons that were input and must always show
+        self.current_polygons = [] #completed, closed polygons
+        
+    def _closePolygon(self):
+        if len(self.current_points) >= 3:
+            #must have 3 points to close the polygon
+            new_poly = self.current_points
+            self.current_polygons.append(new_poly)
+            self.current_points = []
+        return
+    
+    def _clearLastPoint(self):
+        if self.current_points:
+            _ = self.current_points.pop()  #remove most recent element from list and discard
+        return
+    
+    def _drawInstructions(self, canvas):
+        canvas.annotateRect(pv.Rect(2,2,300,80), fill_color="white", alpha=0.25)
+        canvas.annotateLabel(pv.Point(10,10), "Click anywhere in the image to select a point.",color='yellow')
+        canvas.annotateLabel(pv.Point(10,20), "Press 'r' to reset.", color='yellow')
+        canvas.annotateLabel(pv.Point(10,30), "Press 'x' to delete the recent point.",color='yellow')
+        canvas.annotateLabel(pv.Point(10,40), "Press 'c' to close the in-progress polygon.",color='yellow')
+        canvas.annotateLabel(pv.Point(10,50), "Press the space bar when finished.",color='yellow')
+        canvas.annotateLabel(pv.Point(10,60), "Press 'h' to toggle display of this help text.", color='yellow')
+    
+    def _updateImage(self):
+        '''
+        Renders the annotations on top of the current image
+        '''
+        canvas = self.im.copy() #won't copy annotations
+        if self._showHelp: self._drawInstructions(canvas)
+        for idx,p in enumerate(self.default_polygons):
+            canvas.annotatePolygon(p, color='yellow', width=3, fill=None)
+            canvas.annotateLabel(p[0], label=str(idx+1), color='yellow', mark='below')
+        for idx,p in enumerate(self.current_polygons):
+            canvas.annotatePolygon(p, color='red', width=3, fill=None)
+            canvas.annotateLabel(p[0], label=str(idx+1+len(self.default_polygons)), 
+                                 color='red', mark='below')
+        if self.current_points:
+            canvas.annotatePoints(self.current_points, color='blue')
+        if len(self.current_points) > 1:
+            #draw lines connecting the in-progress points of a new polygon
+            for idx in range(1,len(self.current_points)):
+                canvas.annotateLine(self.current_points[idx], self.current_points[idx-1],
+                                      color='blue', width=2)
+        self.canvas = canvas
+    
+    def display(self):
+        '''
+        Display the window and run the main event loop.
+        '''
+        # Setup the mouse callback to handle mouse events (optional)
+        cv.NamedWindow(self.window)
+        if self.pos:
+            cv.MoveWindow(self.window, *self.pos)
+        cv.SetMouseCallback(self.window, self.mouseCallback)
+        
+        while True:
+            self._updateImage()
+            key_press = self.canvas.show(self.window,delay=100)
+            
+            # Handle key press events.
+            if key_press == ord(' '):
+                break
+            
+            if key_press == ord('h'):
+                self._showHelp = not self._showHelp
+            
+            if key_press == ord('q'):
+                self._userquit = True
+                break
+                
+            if key_press == ord('c'):
+                self._closePolygon()
+                
+            if key_press == ord('x'):
+                self._clearLastPoint()
+            
+            if key_press == ord('r'):
+                self.reset()
+                
+        if not self.keep_window_open:
+            cv.DestroyWindow(self.window)
+            
+        #self._showHelp = True
+        all_polys = self.default_polygons + self.current_polygons
+        return all_polys
+           
+    def reset(self):
+        '''
+        Clear the points and start over.
+        '''
+        self.current_points = []
+        self.current_polygons = []
+
+            
 class CaptureClicksVideo:
     '''
-    This object handles the data mangagement and display of the capture clicks window.
+    This object handles the data management and display of the capture clicks window.
     '''
     
     def __init__(self, video, buffer_size = 60, callback = None, 
@@ -138,7 +278,7 @@ class CaptureClicksVideo:
         '''
         Display the window and run the main event loop.
         '''
-        # Setup the mouse callback to handle mause events (optional)
+        # Setup the mouse callback to handle mouse events (optional)
         cv.NamedWindow("PyVision Capture Points")
         if self.pos:
             cv.MoveWindow("PyVision Capture Points", *self.pos)
