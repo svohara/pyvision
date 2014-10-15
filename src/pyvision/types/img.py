@@ -54,6 +54,7 @@ import pyvision as pv
 import cStringIO
 import exif
 import os
+import warnings
 
 # iPython support for ipython notebook
 try:
@@ -84,6 +85,25 @@ TYPE_OPENCV2BW     = "TYPE_OPENCV2BW"
 LUMA = [0.299, 0.587, 0.114, 1.0]
 '''Values used when converting color to gray-scale.'''
 
+def ignore_deprecation_warnings(func):
+    """
+    if using PILLOW instead of PIL, certain pyvision functions
+    relating to im.asOpenCV2() will throw a deprecation warning
+    regarding tostring() vs tobytes(). This function decorator
+    will suppress all deprecation warnings. Use as a standard
+    decorator on a function that is issuing deprecation warnings.
+    @ignore_deprecation_warnings
+    def some_func(....){...}
+    """
+    def new_func(*args, **kwargs):
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore", category=DeprecationWarning)
+            return func(*args, **kwargs)
+    new_func.__name__ = func.__name__
+    new_func.__doc__ = func.__doc__
+    new_func.__dict__.update(func.__dict__)
+    return new_func
+
 class Image:
     '''
     The primary purpose of the image class is to provide a structure that can
@@ -107,6 +127,7 @@ class Image:
  
  
     #------------------------------------------------------------------------
+    @ignore_deprecation_warnings
     def __init__(self,data,bw_annotate=False):
         '''
         Create an image from a file or a PIL Image, OpenCV Image, or numpy array.
@@ -828,8 +849,7 @@ class Image:
         data_buffer = self.toBufferGray(8)
         self.opencv2bw = numpy.frombuffer(data_buffer,numpy.uint8).reshape(self.height,self.width)            
 
-
-        
+    @ignore_deprecation_warnings        
     def toBufferGray(self,depth):
         '''
         @param depth: Use 8, 32, or 64, to specify the bit depth of the pixels.
@@ -841,7 +861,7 @@ class Image:
             pil = self.pil
             if pil.mode != 'L':
                 pil = pil.convert('L')
-            image_buffer = pil.tobytes()
+            image_buffer = pil.tostring()
         elif self.type == TYPE_MATRIX_2D:
             # Just get the buffer
             image_buffer = self.matrix2d.transpose().tostring()
@@ -903,7 +923,7 @@ class Image:
             data = data.astype(types[depth])
             return data.tostring()
         
-
+    @ignore_deprecation_warnings
     def toBufferRGB(self,depth):
         '''
             returns the image data as a binary python string.
@@ -914,7 +934,7 @@ class Image:
             pil = self.pil
             if pil.mode != 'RGB':
                 pil = pil.convert('RGB')
-            image_buffer = pil.tobytes()
+            image_buffer = pil.tostring()
         elif self.type == TYPE_MATRIX_2D:
             # Convert to color
             mat = self.matrix2d.transpose()
@@ -1197,7 +1217,7 @@ class Image:
         
         return "pv.Image(w=%d,h=%d,c=%d,type=%s)"%(self.width,self.height,self.channels,self.type)
 
-
+@ignore_deprecation_warnings
 def OpenCVToNumpy(cvmat):
     '''
     Convert an OpenCV matrix to a numpy matrix.
@@ -1227,7 +1247,7 @@ def OpenCVToNumpy(cvmat):
     a.shape = (r,c)
     return a
 
-
+@ignore_deprecation_warnings
 def NumpyToOpenCV(a):
     '''
     Convert a numpy matrix to an OpenCV matrix. 
