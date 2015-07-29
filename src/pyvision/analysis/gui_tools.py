@@ -104,6 +104,7 @@ class CaptureClicks:
         while True:
             self._updateImage()
             key_press = self.canvas.show(self.window,delay=100)
+            key_press = key_press % 256 
             
             # Handle key press events.
             if key_press == ord(' '):
@@ -216,6 +217,7 @@ class CapturePolygons(CaptureClicks):
         while True:
             self._updateImage()
             key_press = self.canvas.show(self.window,delay=100)
+            key_press = key_press % 256
             
             # Handle key press events.
             if key_press == ord(' '):
@@ -289,6 +291,7 @@ class CaptureClicksVideo:
         
         while True:
             key_press = self.im.show("PyVision Capture Points",delay=100)
+            key_press = key_press % 256
             
             # Handle key press events.
             if key_press == ord('r'):
